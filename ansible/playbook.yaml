@@ -199,10 +199,10 @@
 
     - name: Set alerta user
       command:
-        cmd: |
-          /opt/alerta/bin/alerta --endpoint-url http://0.0.0.0:{{ service_port }}/api signup \
-          --name "{{ user }}" \
-          --email "{{ user }}" \
+        cmd: >
+          /opt/alerta/bin/alerta --endpoint-url http://0.0.0.0:{{ service_port }}/api signup
+          --name "{{ user }}"
+          --email "{{ user }}"
           --password "{{ password }}"
       when: alertarc.stat.exists == false
       tags: install
