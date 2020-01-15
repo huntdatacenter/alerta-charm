@@ -1,0 +1,20 @@
+repo: https://github.com/huntdatacenter/prometheus-node-exporter-charm.git
+includes:
+  - 'layer:basic'
+  - 'interface:http'
+options:
+  basic:
+    python_packages: ['ansible']
+    use_venv: true
+    include_system_packages: true
+exclude:
+  - .pre-commit-config.yaml
+  - .yamllint.yaml
+  - .github
+  - version
+  - tox.ini
+  - tests
+  # Does not get excluded for some reason
+  # - .gitignore
+  # - requirements.txt
+  # - Makefile

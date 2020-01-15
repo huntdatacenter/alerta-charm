@@ -1,0 +1,229 @@
+- hosts: localhost
+  tasks:
+    # https://docs.alerta.io/en/latest/gettingstarted/tutorial-1-deploy-alerta.html
+    - name: Set facts
+      set_fact:
+        repo_url: "https://repo.mongodb.org/apt/ubuntu"
+      tags: install
+
+    - name: Add apt key for MongoDB repository
+      apt_key:
+        keyserver: keyserver.ubuntu.com
+        id: 9DA31620334BD75D9DCB49F368818C72E52529D4
+      tags: install
+
+    - name: Add apt repository for MongoDB
+      apt_repository:
+        repo: deb [ arch=amd64 ] {{ repo_url }} {{ ansible_distribution_release }}/mongodb-org/4.0 multiverse
+        state: present
+        filename: mongodb-org-4.0
+      register: add_repo
+      tags: install
+
+    - name: Update repositories cache
+      apt:
+        update_cache: yes
+      when: add_repo is not skipped
+      tags: install
+
+    - name: Install "mongodb-org" package
+      apt:
+        name: mongodb-org
+        state: present
+      tags: install
+
+    - name: Start and enable mongodb
+      systemd:
+        name: mongod
+        state: started
+        enabled: yes
+        daemon-reload: yes
+      tags: install
+
+    - name: Install python3 packages
+      apt:
+        name: ["python3", "python3-setuptools", "python3-pip", "python3-dev", "python3-venv"]
+        state: present
+      tags: install
+
+    - name: Install nginx and uwsgi packages
+      apt:
+        name: ["nginx", "uwsgi-plugin-python3"]
+        state: present
+      tags: install
+
+    - name: Install or upgrade pip and wheel in virtualenv
+      pip:
+        name: ["pip", "wheel"]
+        virtualenv: /opt/alerta
+        state: latest
+      tags: install
+
+    - name: Install alerta server and uwsgi
+      pip:
+        name: ["alerta-server", "alerta", "uwsgi"]
+        virtualenv: /opt/alerta
+        state: present
+      tags: install
+
+    - name: Check if html directory is empty
+      stat:
+        path: /var/www/html/index.nginx-debian.html
+      register: html_default
+      tags: install
+
+    - name: Remove default html directory
+      file:
+        path: /var/www/html
+        state: absent
+      when: html_default.stat.exists == true
+      tags: install
+
+    - name: Fetch and extract alerta-webui
+      unarchive:
+        src: https://github.com/alerta/alerta-webui/releases/latest/download/alerta-webui.tar.gz
+        dest: /var/www
+        remote_src: yes
+      register: package_retrieval
+      tags: install
+
+    - name: Move alerta-webui into html directory
+      command:
+        cmd: mv /var/www/dist /var/www/html
+        creates: /var/www/html
+        removes: /var/www/dist
+      when: package_retrieval is succeeded
+      tags: install
+
+    - name: Render config.json
+      template:
+        src: config.json.j2
+        dest: /var/www/html/config.json
+      tags: install
+
+    - name: Check if alertad.conf exists
+      stat:
+        path: /etc/alertad.conf
+      register: alertad
+      tags: install
+
+    - name: Create alertad.conf
+      set_fact:
+        secret_key: "{{ lookup('password', '/tmp/passwordfile length=16 chars=ascii_letters,digits,punctuation') }}"
+      when: alertad.stat.exists == false
+      tags: install
+
+    - name: Set alertad.conf
+      template:
+        src: alertad.j2
+        dest: /etc/alertad.conf
+      when: alertad.stat.exists == false
+      tags: install
+
+    - name: Place wsgi file
+      copy:
+        src: wsgi.py
+        dest: /var/www/wsgi.py
+      tags: install
+
+    - name: Render UWSGI ini template
+      template:
+        src: uwsgi.ini.j2
+        dest: /etc/uwsgi.ini
+      register: config
+      tags: install
+
+    - name: Render UWSGI service template
+      template:
+        src: uwsgi.service.j2
+        dest: /etc/systemd/system/uwsgi.service
+        mode: 0644
+      register: service
+      tags: install
+
+    - name: Restart and assure enabled UWSGI service
+      systemd:
+        name: uwsgi
+        state: restarted
+        enabled: yes
+        daemon-reload: "{{ service.changed }}"
+      register: service_restart
+      when: config.changed or service.changed
+      tags: install
+
+    - name: Assure started and enabled UWSGI service
+      systemd:
+        name: uwsgi
+        state: started
+        enabled: yes
+      when: service_restart is skipped
+      tags: install
+
+    - name: Render nginx config
+      template:
+        src: nginx.default.j2
+        dest: /etc/nginx/sites-enabled/default
+      register: nginx
+      tags: install
+
+    - name: Restart and assure enabled NGINX service
+      systemd:
+        name: nginx
+        state: restarted
+        enabled: yes
+        daemon-reload: yes
+      register: nginx_restart
+      when: nginx.changed
+      tags: install
+
+    - name: Assure started and enabled NGINX service
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+      when: nginx_restart is skipped
+      tags: install
+
+    - name: Check if alertarc exists
+      stat:
+        path: /root/.alertarc
+      register: alertarc
+      tags: install
+
+    - name: Create alerta credentials
+      set_fact:
+        user: "alertaadmin"
+        password: "{{ lookup('password', '/tmp/passwordfile length=16 chars=ascii_letters,digits,punctuation') }}"
+      when: alertarc.stat.exists == false
+      tags: install
+
+    - name: Set alerta user
+      command:
+        cmd: |
+          /opt/alerta/bin/alerta --endpoint-url http://0.0.0.0:{{ service_port }}/api signup \
+          --name "{{ user }}" \
+          --email "{{ user }}" \
+          --password "{{ password }}"
+      when: alertarc.stat.exists == false
+      tags: install
+
+    - name: Create alertarc
+      template:
+        src: alertarc.j2
+        dest: /root/.alertarc
+      when: alertarc.stat.exists == false
+      tags: install
+
+    - name: Stop and disable UWSGI
+      systemd:
+        name: uwsgi
+        state: stopped
+        enabled: no
+      tags: never, uninstall
+
+    - name: Stop and disable NGINX
+      systemd:
+        name: nginx
+        state: stopped
+        enabled: no
+      tags: never, uninstall

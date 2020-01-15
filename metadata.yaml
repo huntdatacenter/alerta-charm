@@ -1,0 +1,14 @@
+name: alerta
+summary: Alerta
+maintainer: Matus Kosut <matus.kosut@ntnu.no>
+description: |
+  Alerta.
+tags:
+  - monitoring
+  - alerta
+series:
+  - xenial
+  - bionic
+provides:
+  website:
+    interface: http

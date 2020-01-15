@@ -1,0 +1,5 @@
+series: xenial
+applications:
+  alerta:
+    charm: /tmp/charm-builds/alerta
+    num_units: 1
