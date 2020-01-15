@@ -109,7 +109,7 @@
 
     - name: Create alertad.conf
       set_fact:
-        secret_key: "{{ lookup('password', '/tmp/passwordfile length=16 chars=ascii_letters,digits,punctuation') }}"
+        secret_key: "{{ lookup('password', '/tmp/passwordfile chars=ascii_letters,digits') }}"
       when: alertad.stat.exists == false
       tags: install
 
@@ -193,7 +193,7 @@
     - name: Create alerta credentials
       set_fact:
         user: "alertaadmin"
-        password: "{{ lookup('password', '/tmp/passwordfile length=16 chars=ascii_letters,digits,punctuation') }}"
+        password: "{{ lookup('password', '/tmp/passwordfile length=16 chars=ascii_letters,digits') }}"
       when: alertarc.stat.exists == false
       tags: install
 
