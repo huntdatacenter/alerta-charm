@@ -204,6 +204,9 @@
           --name "{{ user }}"
           --email "{{ user }}"
           --password "{{ password }}"
+      environment:
+        LC_ALL: en_US.UTF-8
+        LANG: en_US.UTF-8
       when: alertarc.stat.exists == false
       tags: install
 
