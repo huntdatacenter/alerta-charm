@@ -2,7 +2,7 @@ name: alerta
 summary: Alerta
 maintainer: Matus Kosut <matus.kosut@ntnu.no>
 description: |
-  Alerta.
+  Alerta juju charm provides Alerta service with web UI.
 tags:
   - monitoring
   - alerta

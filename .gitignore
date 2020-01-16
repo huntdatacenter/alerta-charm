@@ -136,5 +136,6 @@ dmypy.json
 .pyre/
 
 # Dev env
+.vagrant
 vagrant.yaml
 Vagrantfile
