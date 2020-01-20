@@ -5,6 +5,7 @@ from charmhelpers.core import hookenv
 from charmhelpers.core.hookenv import application_version_set
 from charmhelpers.core.hookenv import log
 from charmhelpers.core.hookenv import open_port
+from charmhelpers.core.hookenv import close_port
 from charmhelpers.core.hookenv import status_set
 from charms.reactive import hook
 from charms.reactive import remove_state
@@ -37,6 +38,7 @@ def install_deps():
             'service_port': config.get('port')
         }
     )
+    open_port(config.get('port'))
     status_set('active', 'ready')
     set_state('alerta.installed')
 
@@ -57,6 +59,7 @@ def stop():
             'service_port': config.get('port')
         }
     )
+    close_port(config.get('port'))
 
 
 @hook('start')
@@ -68,6 +71,7 @@ def start():
             'service_port': config.get('port')
         }
     )
+    open_port(config.get('port'))
     status_set('active', 'ready')
 
 
