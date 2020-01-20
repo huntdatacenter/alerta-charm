@@ -3,9 +3,9 @@
 from charmhelpers.contrib.ansible import apply_playbook
 from charmhelpers.core import hookenv
 from charmhelpers.core.hookenv import application_version_set
+from charmhelpers.core.hookenv import close_port
 from charmhelpers.core.hookenv import log
 from charmhelpers.core.hookenv import open_port
-from charmhelpers.core.hookenv import close_port
 from charmhelpers.core.hookenv import status_set
 from charms.reactive import hook
 from charms.reactive import remove_state
@@ -64,6 +64,7 @@ def stop():
 
 @hook('start')
 def start():
+
     apply_playbook(
         playbook='ansible/playbook.yaml',
         tags=['install'],
