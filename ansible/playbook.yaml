@@ -8,7 +8,7 @@
 
     - name: Add apt key for MongoDB repository
       apt_key:
-        keyserver: keyserver.ubuntu.com
+        keyserver: hkp://keyserver.ubuntu.com:80
         id: 9DA31620334BD75D9DCB49F368818C72E52529D4
       tags: install
 
