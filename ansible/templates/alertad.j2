@@ -1,22 +1,36 @@
 SECRET_KEY='{{ secret_key }}'
 SEVERITY_MAP = {
-    'fatal': 0,
+    'security': 0,
     'critical': 1,
+    'major': 2,
+    'minor': 3,
     'warning': 4,
+    'informational': 5,
+    'debug': 5,
+    'trace': 5,
     'indeterminate': 5,
-    'ok': 5,
-    'unknown': 9
+    'cleared': 9,
+    'ok': 9,
+    'normal': 9,
+    'unknown': 10
 }
 DEFAULT_NORMAL_SEVERITY = 'ok'
 COLOR_MAP = {
     'severity': {
-        'fatal': 'blue',
+        'security': 'black',
         'critical': 'red',
+        'major': 'red',
+        'minor': '#1E90FF',
         'warning': '#1E90FF',
+        'informational': 'grey',
+        'debug': 'purple',
+        'trace': 'grey',
         'indeterminate': 'lightblue',
+        'cleared': '#00CC00',
         'ok': '#00CC00',
+        'normal': '#00CC00',
         'unknown': 'silver'
     }
 }
 PLUGINS=['reject']
-ALLOWED_ENVIRONMENTS=['Production', 'Development', 'Code']
+ALLOWED_ENVIRONMENTS=['Production', 'Development', 'Staging']
