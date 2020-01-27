@@ -1,20 +1,22 @@
 #!/usr/local/sbin/charm-env python3
 """
-Upgrade services running in docker.
-
-Pull latest version from registry
-and replace currently running containers
-with this latest version.
+Get alerta credentials.
 """
 
-from charmhelpers.core.hookenv import log
+from charmhelpers.core.hookenv import log, action_set, action_fail
 
 
 if __name__ == "__main__":
     try:
         log('Get admin credentials')
         with open('/root/.alertarc', 'r') as f:
-            contents = f.read()
-            print(contents)
+            contents = f.readlines()
+            data = {}
+            for line in contents:
+                if '=' in line:
+                    k, v = [x.strip() for x in line.split('=', 1)]
+                    data[k] = v
+            action_set(data)
     except IOError:
         log('IOError: {}'.format('/root/.alertarc'), level="ERROR")
+        action_fail('Alerta rc file not found')
