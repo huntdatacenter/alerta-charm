@@ -1,0 +1,3 @@
+#!/bin/bash
+
+/opt/alerta/bin/alerta  --config-file /root/.alertarc "${@}"

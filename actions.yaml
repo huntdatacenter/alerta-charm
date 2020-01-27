@@ -1,0 +1,2 @@
+get-admin-login:
+  description: Get admin credentials.

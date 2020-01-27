@@ -1,0 +1,19 @@
+#!/usr/local/sbin/charm-env python3
+"""
+Upgrade services running in docker.
+
+Pull latest version from registry
+and replace currently running containers
+with this latest version.
+"""
+
+import os
+import sys
+
+from charmhelpers.core.hookenv import log, action_get
+
+
+if __name__ == "__main__":
+    with open('/root/.alertarc', 'r') as f:
+        contents = f.read()
+    print(contents)

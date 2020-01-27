@@ -3,13 +3,17 @@
     # https://docs.alerta.io/en/latest/gettingstarted/tutorial-1-deploy-alerta.html
     - name: Set facts
       set_fact:
+        user: "alertaadmin"
         repo_url: "https://repo.mongodb.org/apt/ubuntu"
+        auth_required: "True"
+        signup_enabled: "False"
       tags: install
 
     - name: Add apt key for MongoDB repository
       apt_key:
         keyserver: hkp://keyserver.ubuntu.com:80
         id: 9DA31620334BD75D9DCB49F368818C72E52529D4
+        state: present
       tags: install
 
     - name: Add apt repository for MongoDB
@@ -66,6 +70,13 @@
         state: present
       tags: install
 
+    - name: Create symlink to alerta
+      copy:
+        src: alerta
+        dest: /usr/local/bin/alerta
+        mode: u=rwx,g=rx,o=rx
+      tags: install
+
     - name: Check if html directory is empty
       stat:
         path: /var/www/html/index.nginx-debian.html
@@ -109,7 +120,9 @@
 
     - name: Create alertad.conf
       set_fact:
-        secret_key: "{{ lookup('password', '/tmp/passwordfile chars=ascii_letters,digits') }}"
+        secret_key: "{{ lookup('password', '/tmp/passwordfile length=30 chars=ascii_letters,digits') }}"
+        auth_required: "False"
+        signup_enabled: "True"
       when: alertad.stat.exists == false
       tags: install
 
@@ -118,6 +131,7 @@
         src: alertad.j2
         dest: /etc/alertad.conf
       when: alertad.stat.exists == false
+      register: alertad_create
       tags: install
 
     - name: Place wsgi file
@@ -192,7 +206,6 @@
 
     - name: Create alerta credentials
       set_fact:
-        user: "alertaadmin"
         password: "{{ lookup('password', '/tmp/passwordfile length=16 chars=ascii_letters,digits') }}"
       when: alertarc.stat.exists == false
       tags: install
@@ -208,13 +221,48 @@
         LC_ALL: en_US.UTF-8
         LANG: en_US.UTF-8
       when: alertarc.stat.exists == false
+      register: alerta_user_set
       tags: install
 
     - name: Create alertarc
       template:
         src: alertarc.j2
         dest: /root/.alertarc
+        mode: '0600'
       when: alertarc.stat.exists == false
+      tags: install
+
+    - name: Create alerta credentials
+      set_fact:
+        auth_required: "True"
+        signup_enabled: "False"
+      when: alertarc.stat.exists == false
+      tags: install
+
+    - name: Set alertad.conf
+      template:
+        src: alertad.j2
+        dest: /etc/alertad.conf
+      when: alertad_create is not skipped
+      register: alertad_recreate
+      tags: install
+
+    - name: Restart and assure enabled UWSGI service
+      systemd:
+        name: uwsgi
+        state: restarted
+      when: alertad_recreate is not skipped
+      tags: install
+
+    - name: Get User ID
+      command: alerta --output plain users | grep alertaadmi | cut -d ' ' -f1
+      when: alerta_user_set is not skipped
+      register: user_id
+      tags: install
+
+    - name: Set user role
+      command: alerta user --id {{ user_id.stdout }} --role admin
+      when: user_id is not skipped
       tags: install
 
     - name: Stop and disable UWSGI

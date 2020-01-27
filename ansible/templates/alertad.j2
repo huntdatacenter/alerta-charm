@@ -1,4 +1,7 @@
-SECRET_KEY='{{ secret_key }}'
+AUTH_REQUIRED = {{ auth_required }}
+SECRET_KEY = "{{ secret_key }}"
+ADMIN_USERS = ["{{ user }}"]
+SIGNUP_ENABLED = {{ signup_enabled }}
 SEVERITY_MAP = {
     'security': 0,
     'critical': 1,
@@ -32,5 +35,5 @@ COLOR_MAP = {
         'unknown': '#e6e6e6'
     }
 }
-PLUGINS=['reject']
-ALLOWED_ENVIRONMENTS=['Production', 'Development', 'Staging']
+PLUGINS = ['reject']
+ALLOWED_ENVIRONMENTS = ['Production', 'Development', 'Staging']
