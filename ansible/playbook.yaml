@@ -261,7 +261,7 @@
       tags: install
 
     - name: Set user role
-      command: alerta user --id {{ user_id.stdout }} --role admin
+      command: alerta user --id {{ user_id.stdout }} --role admin --email-verified
       when: user_id is not skipped
       tags: install
 
