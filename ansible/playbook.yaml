@@ -70,7 +70,7 @@
         state: present
       tags: install
 
-    - name: Create symlink to alerta
+    - name: Create alerta binary
       copy:
         src: alerta
         dest: /usr/local/bin/alerta
