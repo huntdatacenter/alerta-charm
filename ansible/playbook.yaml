@@ -114,13 +114,38 @@
 
     - name: Check if alertad.conf exists
       stat:
+        path: /etc/alertakey.conf
+      register: alertakey
+      tags: install
+
+    - name: Create alertad.conf
+      set_fact:
+        secret_key: "{{ lookup('password', '/tmp/passwordfile length=30 chars=ascii_letters,digits') }}"
+      when: alertakey.stat.exists == false
+      register: alertakey_gen
+      tags: install
+
+    - name: Create alertakey.conf
+      template:
+        src: alertakey.j2
+        dest: /etc/alertakey.conf
+      when: alertakey_gen is not skipped
+      tags: install
+
+    - name: Get password
+      set_fact:
+        secret_key: "{{ lookup('file', '/etc/alertakey.conf') }}"
+      when: alertakey.stat.exists == true
+      tags: install
+
+    - name: Check if alertad.conf exists
+      stat:
         path: /etc/alertad.conf
       register: alertad
       tags: install
 
     - name: Create alertad.conf
       set_fact:
-        secret_key: "{{ lookup('password', '/tmp/passwordfile length=30 chars=ascii_letters,digits') }}"
         auth_required: "False"
         signup_enabled: "True"
       when: alertad.stat.exists == false
@@ -162,7 +187,7 @@
         enabled: yes
         daemon-reload: "{{ service.changed }}"
       register: service_restart
-      when: config.changed or service.changed
+      when: config.changed or service.changed or alertad_create.changed
       tags: install
 
     - name: Assure started and enabled UWSGI service
@@ -229,21 +254,20 @@
         src: alertarc.j2
         dest: /root/.alertarc
         mode: '0600'
-      when: alertarc.stat.exists == false
+      when: alerta_user_set is not skipped and alerta_user_set is succeeded
       tags: install
 
-    - name: Create alerta credentials
+    - name: Set alerta config
       set_fact:
         auth_required: "True"
         signup_enabled: "False"
-      when: alertarc.stat.exists == false
+      when: alerta_user_set is not skipped or auth_required == "False" or signup_enabled == "True"
       tags: install
 
     - name: Set alertad.conf
       template:
         src: alertad.j2
         dest: /etc/alertad.conf
-      when: alertad_create is not skipped
       register: alertad_recreate
       tags: install
 
@@ -251,18 +275,28 @@
       systemd:
         name: uwsgi
         state: restarted
-      when: alertad_recreate is not skipped
+      when: alertad_recreate.changed
       tags: install
 
-    - name: Get User ID
-      command: alerta --output plain users | grep alertaadmi | cut -d ' ' -f1
+    - name: Get Users
+      command: alerta --json users
+      environment:
+        LC_ALL: en_US.UTF-8
+        LANG: en_US.UTF-8
+      register: alerta_users
       when: alerta_user_set is not skipped
-      register: user_id
+      tags: install
+
+    - name: Get admin ID for admin
+      set_fact:
+        admin_id: "{{ alerta_users.stdout | from_json | json_query('[?login==`alertaadmin`].id') }}"
+      when: alerta_user_set is not skipped
+      register: set_admin_id
       tags: install
 
     - name: Set user role
-      command: alerta user --id {{ user_id.stdout }} --role admin --email-verified
-      when: user_id is not skipped
+      command: alerta user --id {{ admin_id[0] }} --role admin --email-verified
+      when: set_admin_id is not skipped and set_admin_id is succeeded
       tags: install
 
     - name: Stop and disable UWSGI
