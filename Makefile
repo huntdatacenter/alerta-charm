@@ -35,10 +35,12 @@ force-upgrade: ## Force upgrade charm
 
 test-xenial-bundle: ## Test Xenial bundle
 	tox -e test-xenial
+	tox -e test-run
 
 
 test-bionic-bundle: ## Test Bionic bundle
 	tox -e test-bionic
+	tox -e test-run
 
 
 push: clean build generate-repo-info ## Push charm to stable channel

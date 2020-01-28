@@ -1,0 +1,26 @@
+# Jujuna test bundle - Alerta
+---
+alerta:
+  service:
+    mongod:
+      status: 'running'
+    nginx:
+      status: 'running'
+    uwsgi:
+      status: 'running'
+  network:
+    port:
+    - 8080
+  file:
+    '/etc/alertad.conf':
+      st_uid: 0
+      st_gid: 0
+      is_dir: True
+    '/etc/alertakey.conf':
+      st_uid: 0
+      st_gid: 0
+      is_dir: True
+    '/root/.alertarc':
+      st_uid: 0
+      st_gid: 0
+      is_dir: True
