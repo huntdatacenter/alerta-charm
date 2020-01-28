@@ -15,12 +15,12 @@ alerta:
     '/etc/alertad.conf':
       st_uid: 0
       st_gid: 0
-      is_dir: True
+      is_reg: True
     '/etc/alertakey.conf':
       st_uid: 0
       st_gid: 0
-      is_dir: True
+      is_reg: True
     '/root/.alertarc':
       st_uid: 0
       st_gid: 0
-      is_dir: True
+      is_reg: True
