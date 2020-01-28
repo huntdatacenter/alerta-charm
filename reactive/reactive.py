@@ -35,12 +35,10 @@ def install_deps():
     apply_playbook(
         playbook='ansible/playbook.yaml',
         extra_vars={
-            'service_port': config.get('port'),
-            'service_upgrade': is_state('alerta.upgrade')
+            'service_port': config.get('port')
         }
     )
     open_port(config.get('port'))
-    remove_state('alerta.upgrade')
     status_set('active', 'ready')
     set_state('alerta.installed')
 
@@ -71,18 +69,15 @@ def start():
         playbook='ansible/playbook.yaml',
         tags=['install'],
         extra_vars={
-            'service_port': config.get('port'),
-            'service_upgrade': is_state('alerta.upgrade')
+            'service_port': config.get('port')
         }
     )
     open_port(config.get('port'))
-    remove_state('alerta.upgrade')
     status_set('active', 'ready')
 
 
 @hook('upgrade-charm')
 def upgrade_charm():
-    set_state('alerta.upgrade')
     remove_state('alerta.version')
     remove_state('alerta.installed')
     remove_state('alerta.configured')
