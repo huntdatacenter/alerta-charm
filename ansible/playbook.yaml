@@ -7,7 +7,7 @@
         repo_url: "https://repo.mongodb.org/apt/ubuntu"
         auth_required: "True"
         signup_enabled: "False"
-      tags: install
+      tags: install, config
 
     - name: Set plugins fact if not defined
       set_fact:
@@ -88,7 +88,7 @@
         virtualenv: /opt/alerta
         state: present
       when: plugin_slack|bool
-      tags: install
+      tags: install, config
 
     - name: Create alerta binary
       copy:
@@ -325,20 +325,11 @@
       register: alertad
       tags: never, config
 
-    - name: Set facts
-      set_fact:
-        user: "alertaadmin"
-        repo_url: "https://repo.mongodb.org/apt/ubuntu"
-        auth_required: "True"
-        signup_enabled: "False"
-      when: alertad.stat.exists == true
-      tags: never, config
-
-    - name: Set alertad.conf
+    - name: Write alertad.conf
       template:
         src: alertad.j2
         dest: /etc/alertad.conf
-      register: alertad_recreate
+      register: alertad_conf
       when: alertad.stat.exists == true
       tags: never, config
 
@@ -346,7 +337,7 @@
       systemd:
         name: uwsgi
         state: restarted
-      when: alertad.stat.exists == true and alertad_recreate.changed
+      when: alertad_conf is not skipped and alertad_conf.changed
       tags: never, config
 
     - name: Stop and disable UWSGI
