@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 
-from charmhelpers.contrib.ansible import apply_playbook
+import json
+import os
+import stat
+import subprocess
+from charmhelpers.contrib.templating.contexts import juju_state_to_yaml
+# from charmhelpers.contrib.ansible import apply_playbook
 from charmhelpers.core import hookenv
 from charmhelpers.core.hookenv import application_version_set
 from charmhelpers.core.hookenv import close_port
@@ -93,6 +98,33 @@ def upgrade_charm():
     remove_state('alerta.installed')
     remove_state('alerta.configured')
     status_set('active', 'ready')
+
+
+def apply_playbook(playbook, tags=None, extra_vars=None):
+    tags = tags or []
+    tags = ",".join(tags)
+    juju_state_to_yaml(
+        '/etc/ansible/host_vars/localhost', namespace_separator='__',
+        allow_hyphens_in_keys=False, mode=(stat.S_IRUSR | stat.S_IWUSR))
+
+    # we want ansible's log output to be unbuffered
+    env = os.environ.copy()
+    env['PYTHONUNBUFFERED'] = "1"
+    call = [
+        'ansible-playbook',
+        '-c',
+        'local',
+        playbook,
+    ]
+    if tags:
+        call.extend(['--tags', '{}'.format(tags)])
+    if extra_vars:
+        if isinstance(extra_vars, dict):
+            call.extend(['--extra-vars', json.dumps(extra_vars)])
+        else:
+            extra = ["%s=%s" % (k, v) for k, v in extra_vars.items()]
+            call.extend(['--extra-vars', " ".join(extra)])
+    subprocess.check_call(call, env=env)
 
 
 def get_settings():
