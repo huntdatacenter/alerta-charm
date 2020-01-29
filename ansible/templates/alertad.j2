@@ -17,7 +17,6 @@ SEVERITY_MAP = {
     'normal': 9,
     'unknown': 10
 }
-DEFAULT_NORMAL_SEVERITY = 'ok'
 COLOR_MAP = {
     'severity': {
         'security': '#a6a6a6',
@@ -35,5 +34,8 @@ COLOR_MAP = {
         'unknown': '#e6e6e6'
     }
 }
-PLUGINS = ['reject']
-ALLOWED_ENVIRONMENTS = ['Production', 'Development', 'Staging']
+PLUGINS = [{% if plugins | length %}{{ plugins }}{% endif %}]
+ALLOWED_ENVIRONMENTS = [{% if environments | length %}{{ environments }}{% else %}'Development'{% endif %}]
+{% if settings is defined %}{% for key, value in settings.items() %}
+{{ key }} = {{ value }}
+{% endfor %}{% endif %}

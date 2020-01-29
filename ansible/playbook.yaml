@@ -9,6 +9,18 @@
         signup_enabled: "False"
       tags: install
 
+    - name: Set plugins fact if not defined
+      set_fact:
+        plugins: 'reject'
+      when: plugins is not defined
+      tags: install
+
+    - name: Set environments fact if not defined
+      set_fact:
+        environments: "'Production', 'Development'"
+      when: environments is not defined
+      tags: install
+
     - name: Add apt key for MongoDB repository
       apt_key:
         keyserver: hkp://keyserver.ubuntu.com:80
@@ -68,6 +80,14 @@
         name: ["alerta-server", "alerta", "uwsgi"]
         virtualenv: /opt/alerta
         state: present
+      tags: install
+
+    - name: Install Slack plugin
+      pip:
+        name: ["git+https://github.com/alerta/alerta-contrib.git#subdirectory=plugins/slack"]
+        virtualenv: /opt/alerta
+        state: present
+      when: plugin_slack|bool
       tags: install
 
     - name: Create alerta binary

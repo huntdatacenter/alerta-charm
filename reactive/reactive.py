@@ -35,7 +35,11 @@ def install_deps():
     apply_playbook(
         playbook='ansible/playbook.yaml',
         extra_vars={
-            'service_port': config.get('port')
+            'service_port': config.get('port'),
+            'plugin_slack': config.get('slack'),
+            'plugins': get_list('plugins'),
+            'environments': get_list('environments'),
+            'settings': get_settings()
         }
     )
     open_port(config.get('port'))
@@ -57,7 +61,10 @@ def stop():
         tags=['uninstall'],
         extra_vars={
             'service_port': config.get('port'),
-            'service_upgrade': False
+            'plugin_slack': config.get('slack'),
+            'plugins': get_list('plugins'),
+            'environments': get_list('environments'),
+            'settings': get_settings()
         }
     )
     close_port(config.get('port'))
@@ -69,7 +76,11 @@ def start():
         playbook='ansible/playbook.yaml',
         tags=['install'],
         extra_vars={
-            'service_port': config.get('port')
+            'service_port': config.get('port'),
+            'plugin_slack': config.get('slack'),
+            'plugins': get_list('plugins'),
+            'environments': get_list('environments'),
+            'settings': get_settings()
         }
     )
     open_port(config.get('port'))
@@ -82,3 +93,45 @@ def upgrade_charm():
     remove_state('alerta.installed')
     remove_state('alerta.configured')
     status_set('active', 'ready')
+
+
+def get_settings():
+    try:
+        used = [
+            'SIGNUP_ENABLED', 'AUTH_REQUIRED', 'SECRET_KEY',
+            'DEFAULT_NORMAL_SEVERITY', 'COLOR_MAP', 'SEVERITY_MAP',
+            'PLUGINS', 'ALLOWED_ENVIRONMENTS', 'SECRET_KEY'
+        ]
+        settings = {}
+        for item in config.get('settings').split(','):
+            try:
+                k, v = [
+                    x.strip().strip('"').strip("'").strip()
+                    for x in item.split('=', 1)
+                ]
+                if len(k) and len(v) and k not in used:
+                    try:
+                        value = int(v)
+                    except Exception:
+                        value = "'{}'".format(v)
+                    settings[k] = value
+                else:
+                    log('Missing key or value in setting', level="ERROR")
+                    raise Exception('Missing')
+            except Exception:
+                log('Cannot parse setting "{}"'.format(item), level="ERROR")
+    except Exception:
+        log('Cannot parse settings string', level="ERROR")
+        settings = {}
+    return settings
+
+
+def get_list(config_key):
+    try:
+        response = config.get(config_key).split(',')
+        response = ", ".join(["'{}'".format(
+            x.strip().strip('"').strip("'").strip()
+        ) for x in response])
+    except Exception:
+        response = ''
+    return response

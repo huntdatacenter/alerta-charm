@@ -9,3 +9,23 @@ options:
     default: 8080
     description: |
       Port to bind http service.
+  environments:
+    default: 'Production,Development,Staging'
+    type: string
+    description: |
+      Comma separated string of environment names
+  plugins:
+    default: 'reject'
+    type: string
+    description: |
+      Comma separated string of plugin names
+  settings:
+    default: 'DEFAULT_NORMAL_SEVERITY=normal,HISTORY_LIMIT=100'
+    type: string
+    description: |
+      Add custom configuration (k1=v1,k2=v2,...) https://docs.alerta.io/en/latest/configuration.html.
+  slack:
+    default: false
+    type: boolean
+    description: |
+      Install Slack plugin, remember to add slack to config plugins to be enabled.
