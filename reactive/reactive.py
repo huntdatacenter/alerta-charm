@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 
-from charmhelpers.contrib.ansible import apply_playbook
+import json
+import os
+import stat
+import subprocess
+
+from charmhelpers.contrib.templating.contexts import juju_state_to_yaml
+# from charmhelpers.contrib.ansible import apply_playbook
 from charmhelpers.core import hookenv
 from charmhelpers.core.hookenv import application_version_set
 from charmhelpers.core.hookenv import close_port
@@ -35,7 +41,11 @@ def install_deps():
     apply_playbook(
         playbook='ansible/playbook.yaml',
         extra_vars={
-            'service_port': config.get('port')
+            'service_port': config.get('port'),
+            'plugin_slack': config.get('slack'),
+            'plugins': get_list('plugins'),
+            'environments': get_list('environments'),
+            'settings': get_settings()
         }
     )
     open_port(config.get('port'))
@@ -57,7 +67,10 @@ def stop():
         tags=['uninstall'],
         extra_vars={
             'service_port': config.get('port'),
-            'service_upgrade': False
+            'plugin_slack': config.get('slack'),
+            'plugins': get_list('plugins'),
+            'environments': get_list('environments'),
+            'settings': get_settings()
         }
     )
     close_port(config.get('port'))
@@ -69,7 +82,11 @@ def start():
         playbook='ansible/playbook.yaml',
         tags=['install'],
         extra_vars={
-            'service_port': config.get('port')
+            'service_port': config.get('port'),
+            'plugin_slack': config.get('slack'),
+            'plugins': get_list('plugins'),
+            'environments': get_list('environments'),
+            'settings': get_settings()
         }
     )
     open_port(config.get('port'))
@@ -82,3 +99,73 @@ def upgrade_charm():
     remove_state('alerta.installed')
     remove_state('alerta.configured')
     status_set('active', 'ready')
+
+
+def apply_playbook(playbook, tags=None, extra_vars=None):
+    tags = tags or []
+    tags = ",".join(tags)
+    juju_state_to_yaml(
+        '/etc/ansible/host_vars/localhost', namespace_separator='__',
+        allow_hyphens_in_keys=False, mode=(stat.S_IRUSR | stat.S_IWUSR))
+
+    # we want ansible's log output to be unbuffered
+    env = os.environ.copy()
+    env['PYTHONUNBUFFERED'] = "1"
+    call = [
+        'ansible-playbook',
+        '-c',
+        'local',
+        playbook,
+    ]
+    if tags:
+        call.extend(['--tags', '{}'.format(tags)])
+    if extra_vars:
+        if isinstance(extra_vars, dict):
+            call.extend(['--extra-vars', json.dumps(extra_vars)])
+        else:
+            extra = ["%s=%s" % (k, v) for k, v in extra_vars.items()]
+            call.extend(['--extra-vars', " ".join(extra)])
+    subprocess.check_call(call, env=env)
+
+
+def get_settings():
+    try:
+        used = [
+            'SIGNUP_ENABLED', 'AUTH_REQUIRED', 'SECRET_KEY',
+            'ALLOWED_ENVIRONMENTS', 'COLOR_MAP', 'SEVERITY_MAP',
+            'PLUGINS', 'SECRET_KEY'
+        ]
+        settings = {}
+        for item in config.get('settings').split(','):
+            try:
+                k, v = [
+                    x.strip().strip('"').strip("'").strip()
+                    for x in item.split('=', 1)
+                ]
+                if len(k) and len(v) and k not in used:
+                    try:
+                        value = int(v)
+                    except Exception:
+                        value = "'{}'".format(v)
+                    settings[k] = value
+                else:
+                    log('Missing key or value in setting', level="ERROR")
+                    raise Exception('Missing')
+            except Exception:
+                log('Cannot parse setting "{}"'.format(item), level="ERROR")
+    except Exception:
+        log('Cannot parse settings string', level="ERROR")
+        settings = {}
+    return settings
+
+
+def get_list(config_key):
+    try:
+        response = config.get(config_key).split(',')
+        response = ", ".join(['"{}"'.format(
+            x.strip().strip('"').strip("'").strip()
+        ) for x in response])
+        # response = "'{}'".format(response)
+    except Exception:
+        response = ''
+    return response

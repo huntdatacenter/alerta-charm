@@ -3,3 +3,7 @@ applications:
   alerta:
     charm: /tmp/charm-builds/alerta
     num_units: 1
+    options:
+      slack: true
+      plugins: 'reject,blackout,slack'
+      environments: 'Production,Development,Testing'
