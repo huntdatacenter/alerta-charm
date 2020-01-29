@@ -99,8 +99,8 @@ def get_settings():
     try:
         used = [
             'SIGNUP_ENABLED', 'AUTH_REQUIRED', 'SECRET_KEY',
-            'DEFAULT_NORMAL_SEVERITY', 'COLOR_MAP', 'SEVERITY_MAP',
-            'PLUGINS', 'ALLOWED_ENVIRONMENTS', 'SECRET_KEY'
+            'ALLOWED_ENVIRONMENTS', 'COLOR_MAP', 'SEVERITY_MAP',
+            'PLUGINS', 'SECRET_KEY'
         ]
         settings = {}
         for item in config.get('settings').split(','):
@@ -129,9 +129,10 @@ def get_settings():
 def get_list(config_key):
     try:
         response = config.get(config_key).split(',')
-        response = ", ".join(["'{}'".format(
+        response = ", ".join(['"{}"'.format(
             x.strip().strip('"').strip("'").strip()
         ) for x in response])
+        response = "'{}'".format(response)
     except Exception:
         response = ''
     return response
