@@ -132,31 +132,31 @@
         dest: /var/www/html/config.json
       tags: install
 
-    - name: Check if alertad.conf exists
+    - name: Check if alertakey.conf exists
       stat:
         path: /etc/alertakey.conf
       register: alertakey
-      tags: install
+      tags: install, config
 
     - name: Create alertad.conf
       set_fact:
         secret_key: "{{ lookup('password', '/tmp/passwordfile length=30 chars=ascii_letters,digits') }}"
       when: alertakey.stat.exists == false
       register: alertakey_gen
-      tags: install
+      tags: install, config
 
     - name: Create alertakey.conf
       template:
         src: alertakey.j2
         dest: /etc/alertakey.conf
       when: alertakey_gen is not skipped
-      tags: install
+      tags: install, config
 
     - name: Get password
       set_fact:
         secret_key: "{{ lookup('file', '/etc/alertakey.conf') }}"
       when: alertakey.stat.exists == true
-      tags: install
+      tags: install, config
 
     - name: Check if alertad.conf exists
       stat:
