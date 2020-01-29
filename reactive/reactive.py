@@ -164,7 +164,7 @@ def get_list(config_key):
         response = ", ".join(['"{}"'.format(
             x.strip().strip('"').strip("'").strip()
         ) for x in response])
-        response = "'{}'".format(response)
+        # response = "'{}'".format(response)
     except Exception:
         response = ''
     return response
