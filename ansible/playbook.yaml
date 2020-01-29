@@ -319,6 +319,36 @@
       when: set_admin_id is not skipped and set_admin_id is succeeded
       tags: install
 
+    - name: Check if alertad.conf exists
+      stat:
+        path: /etc/alertad.conf
+      register: alertad
+      tags: never, config
+
+    - name: Set facts
+      set_fact:
+        user: "alertaadmin"
+        repo_url: "https://repo.mongodb.org/apt/ubuntu"
+        auth_required: "True"
+        signup_enabled: "False"
+      when: alertad.stat.exists == true
+      tags: never, config
+
+    - name: Set alertad.conf
+      template:
+        src: alertad.j2
+        dest: /etc/alertad.conf
+      register: alertad_recreate
+      when: alertad.stat.exists == true
+      tags: never, config
+
+    - name: Restart and assure enabled UWSGI service
+      systemd:
+        name: uwsgi
+        state: restarted
+      when: alertad.stat.exists == true and alertad_recreate.changed
+      tags: never, config
+
     - name: Stop and disable UWSGI
       systemd:
         name: uwsgi

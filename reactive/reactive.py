@@ -93,11 +93,27 @@ def start():
     status_set('active', 'ready')
 
 
+@hook('config-changed')
+def config_changed():
+    apply_playbook(
+        playbook='ansible/playbook.yaml',
+        tags=['config'],
+        extra_vars={
+            'service_port': config.get('port'),
+            'plugin_slack': config.get('slack'),
+            'plugins': get_list('plugins'),
+            'environments': get_list('environments'),
+            'settings': get_settings()
+        }
+    )
+    open_port(config.get('port'))
+    status_set('active', 'ready')
+
+
 @hook('upgrade-charm')
 def upgrade_charm():
     remove_state('alerta.version')
     remove_state('alerta.installed')
-    remove_state('alerta.configured')
     status_set('active', 'ready')
 
 
