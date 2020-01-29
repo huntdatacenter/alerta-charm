@@ -4,6 +4,7 @@ import json
 import os
 import stat
 import subprocess
+
 from charmhelpers.contrib.templating.contexts import juju_state_to_yaml
 # from charmhelpers.contrib.ansible import apply_playbook
 from charmhelpers.core import hookenv
