@@ -26,16 +26,17 @@ Here are some helpful commands to get started with development and testing:
 
 ```
 $ make help
-lint                 Run linter
-build                Build charm
-deploy               Deploy charm
-upgrade              Upgrade charm
-force-upgrade        Force upgrade charm
-test-xenial-bundle   Test Xenial bundle
-test-bionic-bundle   Test Bionic bundle
-push                 Push charm to stable channel
-clean                Clean .tox and build
-help                 Show this help
+lint                  Run linter
+build                 Build charm
+deploy                Deploy charm
+upgrade               Upgrade charm
+force-upgrade         Force upgrade charm
+deploy-xenial-bundle  Deploy Xenial test bundle
+deploy-bionic-bundle  Deploy Bionic test bundle
+test-bundle           Test deployed bundle with jujuna
+push                  Push charm to stable channel
+clean                 Clean .tox and build
+help                  Show this help
 ```
 
 ## Links
