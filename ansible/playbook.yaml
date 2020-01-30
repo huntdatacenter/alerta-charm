@@ -284,24 +284,6 @@
       when: alertad_recreate.changed
       tags: install
 
-    # - name: Get Users
-    #   command: alerta --json users
-    #   register: alerta_users
-    #   when: alerta_user_set is not skipped
-    #   tags: install
-    #
-    # - name: Get admin ID for admin
-    #   set_fact:
-    #     admin_id: "{{ alerta_users.stdout | from_json | json_query('[?login==`alertaadmin`].id') }}"
-    #   when: alerta_user_set is not skipped
-    #   register: set_admin_id
-    #   tags: instal
-    #
-    # - name: Set user role
-    #   command: alerta user --id {{ admin_id[0] }} --role admin
-    #   when: set_admin_id is not skipped and set_admin_id is succeeded
-    #   tags: install
-
     - name: Check if alertad.conf exists
       stat:
         path: /etc/alertad.conf
