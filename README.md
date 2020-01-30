@@ -20,6 +20,13 @@ juju deploy juju deploy cs:haproxy haproxy-alerta
 juju add-relation haproxy-alerta alerta
 ```
 
+Once alerta is deployed authentication is enforced, and signup of new users is disabled.
+Alerta generated admin account and admin credentials can be retrieved over juju:
+
+```
+juju run-action alerta/0 --wait get-admin-login
+```
+
 ## Development
 
 Here are some helpful commands to get started with development and testing:
