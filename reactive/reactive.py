@@ -136,11 +136,7 @@ def apply_playbook(playbook, tags=None, extra_vars=None):
     if tags:
         call.extend(['--tags', '{}'.format(tags)])
     if extra_vars:
-        if isinstance(extra_vars, dict):
-            call.extend(['--extra-vars', json.dumps(extra_vars)])
-        else:
-            extra = ["%s=%s" % (k, v) for k, v in extra_vars.items()]
-            call.extend(['--extra-vars', " ".join(extra)])
+        call.extend(['--extra-vars', json.dumps(extra_vars)])
     subprocess.check_call(call, env=env)
 
 
