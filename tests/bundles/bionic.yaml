@@ -12,7 +12,12 @@ applications:
       slack: true
       plugins: 'reject,blackout,slack'
       environments: 'Production,Development,Testing'
+    to: 1
   haproxy:
     charm: cs:haproxy
     expose: true
     num_units: 1
+    to: 1
+
+machines:
+  "1":
