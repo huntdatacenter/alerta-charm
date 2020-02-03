@@ -1,4 +1,9 @@
 series: bionic
+
+relations:
+- - alerta:website
+  - haproxy:reverseproxy
+
 applications:
   alerta:
     charm: /tmp/charm-builds/alerta
@@ -7,3 +12,6 @@ applications:
       slack: true
       plugins: 'reject,blackout,slack'
       environments: 'Production,Development,Testing'
+  haproxy:
+    charm: cs:haproxy
+    num_units: 1
