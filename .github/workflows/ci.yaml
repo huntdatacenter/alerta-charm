@@ -72,7 +72,7 @@ jobs:
       - name: Run deploy
         run: make deploy-${{ matrix.test_bundles }}
       - name: Run jujuna tests
-        run: make test-bundle || echo "ignore failed"
+        run: make test-bundle
       - name: Display juju debug log on failure
         run: juju debug-log --lines 100
         if: failure()
