@@ -41,9 +41,11 @@ def install_deps():
     apply_playbook(
         playbook='ansible/playbook.yaml',
         extra_vars={
+            'debug': str(config.get('debug')),
             'service_port': config.get('port'),
             'plugin_slack': config.get('slack'),
             'plugins': get_list('plugins'),
+            'columns': get_list('columns'),
             'environments': get_list('environments'),
             'settings': get_settings()
         }
@@ -66,9 +68,11 @@ def stop():
         playbook='ansible/playbook.yaml',
         tags=['uninstall'],
         extra_vars={
+            'debug': str(config.get('debug')),
             'service_port': config.get('port'),
             'plugin_slack': config.get('slack'),
             'plugins': get_list('plugins'),
+            'columns': get_list('columns'),
             'environments': get_list('environments'),
             'settings': get_settings()
         }
@@ -82,9 +86,11 @@ def start():
         playbook='ansible/playbook.yaml',
         tags=['install'],
         extra_vars={
+            'debug': str(config.get('debug')),
             'service_port': config.get('port'),
             'plugin_slack': config.get('slack'),
             'plugins': get_list('plugins'),
+            'columns': get_list('columns'),
             'environments': get_list('environments'),
             'settings': get_settings()
         }
@@ -99,9 +105,11 @@ def config_changed():
         playbook='ansible/playbook.yaml',
         tags=['config'],
         extra_vars={
+            'debug': str(config.get('debug')),
             'service_port': config.get('port'),
             'plugin_slack': config.get('slack'),
             'plugins': get_list('plugins'),
+            'columns': get_list('columns'),
             'environments': get_list('environments'),
             'settings': get_settings()
         }

@@ -19,6 +19,11 @@ options:
     type: string
     description: |
       Comma separated string of plugin names
+  columns:
+    default: 'severity,status,lastReceiveTime,duplicateCount,service,resource,event,value'
+    type: string
+    description: |
+      Comma separated string of column names
   settings:
     default: 'DEFAULT_NORMAL_SEVERITY=normal,HISTORY_LIMIT=100'
     type: string

@@ -90,6 +90,21 @@
       when: plugin_slack|bool
       tags: install, config
 
+    - name: Place routing plugin
+      synchronize:
+        src: routing
+        dest: /opt
+      when: plugin_slack|bool
+      tags: install
+
+    - name: Install routing plugin
+      pip:
+        name: "/opt/routing"
+        virtualenv: /opt/alerta
+        state: present
+      when: plugin_slack|bool
+      tags: install
+
     - name: Create alerta binary
       copy:
         src: alerta

@@ -1,7 +1,8 @@
-AUTH_REQUIRED = {{ auth_required }}
+DEBUG = {% if debug is defined %}{{ debug }}{% else %}False{% endif %}
+AUTH_REQUIRED = {% if auth_required is defined %}{{ auth_required }}{% else %}True{% endif %}
 SECRET_KEY = "{{ secret_key }}"
-ADMIN_USERS = ["{{ user }}"]
-SIGNUP_ENABLED = {{ signup_enabled }}
+ADMIN_USERS = [{% if user is defined %}"{{ user }}"{% endif %}]
+SIGNUP_ENABLED = {% if signup_enabled is defined %}{{ signup_enabled }}{% else %}True{% endif %}
 SEVERITY_MAP = {
     'security': 0,
     'critical': 1,
@@ -34,8 +35,14 @@ COLOR_MAP = {
         'unknown': '#e6e6e6'
     }
 }
+DATE_FORMAT_LONG_DATE = 'DD.MM.YYYY HH:mm:ss.sss'
+DATE_FORMAT_MEDIUM_DATE = 'DD.MM.YYYY HH:mm:ss'
+DATE_FORMAT_SHORT_TIME = 'HH:mm'
+COLUMNS = [{% if columns | length %}{{ columns }}{% endif %}]
+SORT_LIST_BY = 'lastReceiveTime'
 PLUGINS = [{% if plugins | length %}{{ plugins }}{% endif %}]
 ALLOWED_ENVIRONMENTS = [{% if environments | length %}{{ environments }}{% else %}'Development'{% endif %}]
 {% if settings is defined %}{% for key, value in settings.items() %}
 {{ key }} = {{ value }}
 {% endfor %}{% endif %}
+{% if plugin_slack %}{% include "./templates/slack_payload.conf" without context %}{% endif %}
