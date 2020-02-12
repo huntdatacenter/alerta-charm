@@ -68,18 +68,17 @@
         state: present
       tags: install
 
-    - name: Install or upgrade pip and wheel in virtualenv
+    - name: Install alerta server and dependencies
       pip:
-        name: ["pip", "wheel"]
+        name: "{{ item.name }}"
         virtualenv: /opt/alerta
-        state: latest
-      tags: install
-
-    - name: Install alerta server and uwsgi
-      pip:
-        name: ["alerta-server", "alerta", "uwsgi"]
-        virtualenv: /opt/alerta
-        state: present
+        state: "{{ item.state }}"
+      with_items:
+        - { name: 'pip', state: 'latest' }
+        - { name: 'wheel', state: 'latest' }
+        - { name: 'uwsgi', state: 'present' }
+        - { name: 'alerta-server=={{ server_version }}', state: 'present' }
+        - { name: 'alerta=={{ client_version }}', state: 'present' }
       tags: install
 
     - name: Install Slack plugin
