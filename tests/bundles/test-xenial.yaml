@@ -12,6 +12,8 @@ alerta:
     port:
       '8080': True
   file:
+    '/opt/alerta':
+      is_dir: True
     '/etc/alertad.conf':
       st_uid: 0
       st_gid: 0
@@ -27,6 +29,8 @@ alerta:
     '/root/.alertarc':
       st_uid: 0
       st_gid: 0
+      is_reg: True
+    '/opt/alerta/lib/python3.5/site-packages/routing.py':
       is_reg: True
 haproxy:
   service:

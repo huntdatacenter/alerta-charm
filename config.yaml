@@ -9,6 +9,16 @@ options:
     default: 8080
     description: |
       Port to bind http service.
+  server_version:
+    type: string
+    default: 7.4.4
+    description: |
+      Version of alerta-server pip package.
+  client_version:
+    type: string
+    default: 7.4.0
+    description: |
+      Version of alerta pip package.
   environments:
     default: 'Production,Development,Staging'
     type: string
@@ -19,6 +29,11 @@ options:
     type: string
     description: |
       Comma separated string of plugin names
+  columns:
+    default: 'severity,status,lastReceiveTime,duplicateCount,service,resource,event,value'
+    type: string
+    description: |
+      Comma separated string of column names
   settings:
     default: 'DEFAULT_NORMAL_SEVERITY=normal,HISTORY_LIMIT=100'
     type: string

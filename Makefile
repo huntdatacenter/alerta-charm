@@ -41,8 +41,12 @@ deploy-bionic-bundle: ## Deploy Bionic test bundle
 	tox -e deploy-bionic
 
 
-test-bundle: ## Test bundle
-	tox -e test-bundle
+test-xenial-bundle: ## Test Xenial test bundle
+	tox -e test-xenial
+
+
+test-bionic-bundle: ## Test Bionic test bundle
+	tox -e test-bionic
 
 
 push: clean build generate-repo-info ## Push charm to stable channel
