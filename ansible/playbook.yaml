@@ -74,11 +74,11 @@
         virtualenv: /opt/alerta
         state: "{{ item.state }}"
       with_items:
-        - { name: 'pip', state: 'latest' }
-        - { name: 'wheel', state: 'latest' }
-        - { name: 'uwsgi', state: 'present' }
-        - { name: 'alerta-server=={{ server_version }}', state: 'present' }
-        - { name: 'alerta=={{ client_version }}', state: 'present' }
+        - {name: 'pip', state: 'latest'}
+        - {name: 'wheel', state: 'latest'}
+        - {name: 'uwsgi', state: 'present'}
+        - {name: 'alerta-server=={{ server_version }}', state: 'present'}
+        - {name: 'alerta=={{ client_version }}', state: 'present'}
       tags: install
 
     - name: Install Slack plugin
