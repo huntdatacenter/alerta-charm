@@ -4,7 +4,7 @@ includes:
   - 'interface:http'
 options:
   basic:
-    packages: ['python3-jmespath']
+    packages: ['python3-jmespath', 'git+https://github.com/juju/charm-helpers.git']
     python_packages: ['ansible']
     use_venv: true
     include_system_packages: true
